@@ -3,6 +3,7 @@
 #define __HEAP_MAPPER__H_
 
 #include "heap_interface.hpp"
+#include <map>
 
 
 class HeapMapper : public HeapInterface {
@@ -12,20 +13,22 @@ class HeapMapper : public HeapInterface {
         // Private copy constructor and assignment operator to prevent copying
         HeapMapper(const HeapMapper&) = delete;
         HeapMapper& operator=(const HeapMapper&) = delete;
-        void addObject(Object* value) override;
-        void addPtr(Object*& value);
+
+        std::map<Object**, LinkedListNode<Object**>*> m_address_LLN ;
+
+       
     public:
-    // Public methods
-    // Static method to get the single instance of HeapMapper
     static HeapMapper& getInstance() {
-        static HeapMapper instance;  // Guaranteed to be destroyed, instantiated on first use
+        static HeapMapper instance;
         return instance;
     }
+    void deleteRefTree(Object** current) override ;
 
-    // Public methods for manipulating the unordered_map and unordered_set
     void add_ptr_value(Object **ptr, Object* value) override;
-
     private:   
+    void  updateReferenceTree(Object **ptr);
+    void recDeleteRefTree(LinkedListNode<Object**>* current);
+
 };
 
 #endif // !__HEAP_MAPPER__H_

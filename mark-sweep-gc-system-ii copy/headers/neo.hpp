@@ -7,7 +7,7 @@
 #include "heap_mapper.hpp"
 
 #include <iostream>
-
+#define print(X) {std::cout << X << std::endl;}
 class Object;
 class HeapMapper;
 
@@ -20,13 +20,15 @@ void allocateAndRegister(Object** ptr) {
 template <typename T, typename... Args>
 void neo(T** ptr,  Args&&... args) { 
     *ptr = new T(std::forward<Args>(args)...); // Points to new heap object
+    reinterpret_cast<Object*>(*ptr)->sizeofclass = sizeof(T);
     allocateAndRegister((Object **) ptr);
 }
 
 template <typename T>
-void neo(T** root) {
-    *root = new T(); // Default constructor
-    allocateAndRegister((Object **) root);
+void neo(T** ptr) {
+    *ptr = new T(); // Default constructor
+    reinterpret_cast<Object*>(*ptr)->sizeofclass = sizeof(T);
+    allocateAndRegister((Object **) ptr);
 }
 
 

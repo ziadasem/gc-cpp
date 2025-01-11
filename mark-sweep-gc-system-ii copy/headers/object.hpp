@@ -6,9 +6,12 @@ class Object{
 private:
     bool mark_bit ;
     const int integrity = 123456789 ;
+    unsigned long long sizeofclass = 0 ;
     friend class GC ;
     friend class HeapMapper ;
     friend void allocateAndRegister(Object** ptr);
+    template <typename T, typename... Args> friend void neo(T** ptr,  Args&&... args);
+    template <typename T> friend void neo(T** ptr);
 
 
 public:
