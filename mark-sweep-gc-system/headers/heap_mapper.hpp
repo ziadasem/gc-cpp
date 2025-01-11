@@ -1,20 +1,35 @@
-#ifndef __HEAP_MAPPER_H__
-#define __HEAP_MAPPER_H__
+#ifndef __HEAP_MAPPER__H_
 
-#include <unordered_set>
+#define __HEAP_MAPPER__H_
+
 #include "heap_interface.hpp"
+#include <map>
 
-class HeapMapper : public HeapInterfaces {
-    private:
-        std::unordered_set<Object*> m_object_address ;
-        std::unordered_set<Object*> m_root_set ;
+
+class HeapMapper : public HeapInterface {
+    private:  
+        // Private constructor to prevent instantiation
+        HeapMapper() {}
+        // Private copy constructor and assignment operator to prevent copying
+        HeapMapper(const HeapMapper&) = delete;
+        HeapMapper& operator=(const HeapMapper&) = delete;
+
+        std::map<Object**, LinkedListNode<Object**>*> m_address_LLN ;
+
+       
     public:
-        void add(Object* obj) override;
-        void remove(Object* obj) override;
-        void add_root(Object* obj) override;
+    static HeapMapper& getInstance() {
+        static HeapMapper instance;
+        return instance;
+    }
+    void deleteRefTree(Object** current) override ;
 
-        void* get_root_set() override ;
-        void* get_object_address() override;
+    void add_ptr_value(Object **ptr, Object* value) override;
+    private:   
+    void  updateReferenceTree(Object **ptr);
+    void recDeleteRefTree(LinkedListNode<Object**>* current);
+
 };
 
-#endif // !__HEAP_MAPPER_H__
+#endif // !__HEAP_MAPPER__H_
+

@@ -1,14 +1,9 @@
 #include <iostream>
 #define print(X) {std::cout << X << std::endl;}
-#include "headers/object.hpp"
-#include "headers/garbage_collector.hpp"
-#include "headers/heap_mapper.hpp"
-#include "headers/neo.hpp"
-
-#include <chrono> // For std::chrono::seconds
-#include <thread> // For std::this_thread::sleep_for
-
-
+#include "../headers/object.hpp"
+#include "../headers/garbage_collector.hpp"
+#include "../headers/heap_mapper.hpp"
+#include "../headers/neo.hpp"
 
 class A : public Object {
     public:
@@ -17,31 +12,10 @@ class A : public Object {
         A* next_3 ;
         A* next_4 ;
         A* next_5 ;
-
-        int integrity = 123456789 ;
         A(){}
-        
-       
         A(int x)  { Object::y = x ;}
 };
 
-class P {
-    public:
-        int x = 10;
-};
-class C  : public P{
-    public:
-        int y = 10;
-        int z = 10;
-};
-
-void stackRef(){
-     A* abc = nullptr;
-     for (int i = 0; i < 5 ; i++) {
-        neo<A>(&abc, i);
-        neo<A>(&(abc->next), i * 10);
-    }
-}
 
 
 int main(){

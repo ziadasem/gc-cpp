@@ -1,15 +1,34 @@
-#ifndef __HEAP_INTERFACE__
-#define __HEAP_INTERFACE__
+#ifndef __HEAP_Interface__H_
+
+#define __HEAP_Interface__H_
 #include "object.hpp"
+#include <set>
+#include <map>
 
-class HeapInterfaces {
-    private:
+class Object;
+
+template<class T>
+class LinkedListNode {
     public:
-        virtual void add(Object* obj) =  0 ;
-        virtual void remove(Object* obj) = 0;
-        virtual void add_root(Object* obj) =0 ;
-
-        virtual void * get_root_set()  =0 ;
-        virtual void * get_object_address() =0 ;
+     LinkedListNode* brother ;
+     LinkedListNode* child ;
+     T value ;
+     LinkedListNode( T value, LinkedListNode* brother = nullptr, LinkedListNode* child  = nullptr): 
+     brother(brother), child(child), value(value) {}
 };
-#endif
+
+class HeapInterface {
+    friend class GC ;
+    protected:  
+        std::set<Object**> m_ptrs ;
+        std::set<Object*> m_objects ;
+        std::map<Object**,  LinkedListNode<Object**>*> m_roots ;
+    public:
+  
+    virtual void add_ptr_value(Object **ptr, Object* value) =0;
+    virtual void deleteRefTree(Object**) = 0;
+    private:   
+};
+
+#endif // !__HEAP_Interface__H_
+
