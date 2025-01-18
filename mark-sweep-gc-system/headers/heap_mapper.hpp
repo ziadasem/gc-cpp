@@ -1,7 +1,7 @@
 #ifndef __HEAP_MAPPER__H_
 
 #define __HEAP_MAPPER__H_
-
+#include "print.hpp"
 #include "heap_interface.hpp"
 #include <map>
 

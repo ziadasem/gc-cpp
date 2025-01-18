@@ -1,10 +1,8 @@
 #ifndef _GARBAGE_COLLECTOR_H_
 #define _GARBAGE_COLLECTOR_H_
-
+#include "print.hpp"
 #include "heap_mapper.hpp"
 #include "object.hpp"
-
-
 
 
 //garbage collector class

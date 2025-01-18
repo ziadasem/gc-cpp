@@ -5,9 +5,8 @@
 #include <utility>
 #include "object.hpp"
 #include "heap_mapper.hpp"
+#include "print.hpp"
 
-#include <iostream>
-#define print(X) {std::cout << X << std::endl;}
 class Object;
 class HeapMapper;
 

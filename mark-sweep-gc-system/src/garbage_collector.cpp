@@ -2,8 +2,7 @@
 #include "../headers/garbage_collector.hpp"
 #define Number_Of_Sweeped_Objects int
 
-#include <iostream>
-#define print(X) {std::cout << X << std::endl;}
+
 
 Number_Of_Sweeped_Objects GC::garbageCollect(){
     print("number of ptrs: "<<heap_mapper.m_ptrs.size());
@@ -28,6 +27,12 @@ void GC::markReachableObjects (){
 
 void GC::recMarkReachableObjects (LinkedListNode<Object **> *current){
    if (current == nullptr) return ;
+   
+   if (!current->value){
+        recMarkReachableObjects(current->brother);
+        return ;
+   }
+
    if (*current->value){
         if ((*current->value)->mark_bit){ return ;} //avoid infinite recursion
         (*current->value)->mark_bit = true ;
@@ -41,40 +46,6 @@ void GC::recMarkReachableObjects (LinkedListNode<Object **> *current){
   
 }
 
-/*
-void GC::recMarkReachableObjects (LinkedListNode<Object **> *current){
-   if (current == nullptr) return ;
-   print(current->value)
-   if (*current->value){
-         
-        if ((*current->value)->mark_bit){ return ;} //avoid infinite recursion
-        
-         (*current->value)->mark_bit = true ;
-   }else{
-        heap_mapper.deleteRefTree(current->value); //delete the reference tree
-        return ;
-   }
-    
-   LinkedListNode<Object **> *tempB = current->brother;
-   
-   if (tempB){
-        (*tempB->value)->mark_bit = true ;  
-        recMarkReachableObjects(tempB->brother); //find its brother
-        recMarkReachableObjects(tempB->child); //find its children
-   }
-
-   LinkedListNode<Object **> *tempC = current->child;
-    
-
-   if (tempC){ 
-        (*tempC->value)->mark_bit = true ; 
-        recMarkReachableObjects(tempC->child); //find its children
-        recMarkReachableObjects(tempC->brother); //find its brother
-   }
-
-    
-}
-*/
 
 int GC::sweepUnreachableObjects(){
     int freedCount = 0;

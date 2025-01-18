@@ -1,6 +1,4 @@
 #include "../headers/heap_mapper.hpp"
-#include <iostream>
-#define print(X) {std::cout << X << std::endl;}
 
 void HeapMapper::add_ptr_value(Object **ptr, Object* value)
 {
@@ -13,10 +11,16 @@ void HeapMapper::add_ptr_value(Object **ptr, Object* value)
 }
 
 void HeapMapper::updateReferenceTree(Object **it) {
+    //check if new pointer is already existing, remove the tree
+    if (m_address_LLN[it] && m_address_LLN[it]->value){
+        deleteRefTree(it);
+        print("reassign: "<<it)
+    }
+
     //updating existing reference to reference another object
     if (m_roots.find(it) != m_roots.end()){
         //deleting all references tree of the previous object (no more accessable via this path)
-        recDeleteRefTree(m_roots[it]);
+        deleteRefTree(it);
         m_roots[it] = new LinkedListNode<Object **>(it);
         m_address_LLN[it] = m_roots[it] ;
         print("updated: "<<it)
@@ -48,12 +52,11 @@ void HeapMapper::updateReferenceTree(Object **it) {
             }else{
                
                 LinkedListNode<Object **>* current = m_address_LLN[*objectRreference]->child;
-                 print("Feel the magic in the air")
                 while (current->brother!= nullptr) { current = current->brother; }
                     current->brother = new LinkedListNode<Object **>(it);
                     m_address_LLN[it] = current->brother ; //reference the possible new parent
             }
-            print("attached: "<<it)
+            print("attached: "<<it << " to: "<< *objectRreference)
             return; //stop
         }
         objectRreference++ ;
@@ -68,6 +71,7 @@ void HeapMapper::updateReferenceTree(Object **it) {
 void HeapMapper::deleteRefTree(Object** node){
     recDeleteRefTree(m_address_LLN[node]->child);
     m_address_LLN[node]->child = nullptr;
+    m_address_LLN[node]->value = nullptr;
 }
 void HeapMapper::recDeleteRefTree(LinkedListNode<Object**>* current){
     if (!current) return;
