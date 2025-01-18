@@ -31,7 +31,7 @@ void HeapMapper::updateReferenceTree(Object **it) {
     for (auto objectRreference = m_ptrs.begin(); objectRreference != m_ptrs.end(); )
     {
         //check if refernce is valid
-        if (*objectRreference == nullptr || **objectRreference == nullptr || (**objectRreference)->integrity != 123456789){ 
+        if (*objectRreference == nullptr || **objectRreference == nullptr /*|| (**objectRreference)->integrity != 123456789 */){ 
             // not valid refernce
             objectRreference = m_ptrs.erase(objectRreference);
             continue;
@@ -83,36 +83,22 @@ void HeapMapper::recDeleteRefTree(LinkedListNode<Object**>* current){
 
 }
 // void HeapMapper::recDeleteRefTree(LinkedListNode<Object**>* current){
-inline bool HeapMapper::isDanglingObjectReference(Object **objectRreference)
+inline bool HeapMapper::isInvalidObjectReference(Object **objectRreference)
 {
+    //check if its null or dangling reference
+    return !objectRreference || m_objects.find(*objectRreference) == m_objects.end();
     
-    if (!objectRreference){
-        return true;
-    }
-    void * reference = *objectRreference;
-    if (!reference){
-        return true;
-    }
-    int integrity =   * ((int*) reference);
+    // Using integrity variable -the old method-
+    // if (!objectRreference){
+    //     return true;
+    // }
+    // void * level1_reference = *objectRreference;
 
-    return integrity != 123456789;
+    // if (!level1_reference){
+    //     return true;
+    // }
+    
+    // // in case of dangling reference has the same address
+    // int integrity =   * ((int*) level1_reference);    
+    // return integrity != 123456789;
 }
-//     LinkedListNode<Object **> *temp = current;
-//     LinkedListNode<Object **> *tempB = current->brother;
-//     LinkedListNode<Object **> *tempC = current->child;
-//     while (tempB) {
-//         LinkedListNode<Object **> *tempBB = tempB->brother;
-//         m_ptrs.erase(tempB->value);
-//         m_address_LLN.erase(tempB->value);
-//         delete tempB;
-//         tempB = tempBB;
-//     }
-//     while (tempC) {
-//         LinkedListNode<Object **> *tempCC = tempC->child;
-//         m_ptrs.erase(tempC->value);
-//         m_address_LLN.erase(tempC->value);
-//         delete tempC;
-//         tempC = tempCC;
-//     }
-//     delete current ;
-// }

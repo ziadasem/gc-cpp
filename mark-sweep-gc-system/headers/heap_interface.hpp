@@ -28,7 +28,7 @@ class HeapInterface {
     virtual void add_ptr_value(Object **ptr, Object* value) =0;
     virtual void deleteRefTree(Object**) = 0;
 
-    inline virtual bool isDanglingObjectReference(Object**) = 0 ;
+    inline virtual bool isInvalidObjectReference(Object**) = 0 ;
     private:   
 };
 

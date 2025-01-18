@@ -28,7 +28,7 @@ class HeapMapper : public HeapInterface {
     private:   
     void  updateReferenceTree(Object **ptr);
     void recDeleteRefTree(LinkedListNode<Object**>* current);
-    inline  bool isDanglingObjectReference(Object** objectRreference) override ;
+    inline  bool isInvalidObjectReference(Object** objectRreference) override ;
 };
 
 #endif // !__HEAP_MAPPER__H_

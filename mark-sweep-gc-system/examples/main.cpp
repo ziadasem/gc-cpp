@@ -3,19 +3,19 @@
 #include <csignal>
 #include <cstdlib>
 
-#define TEST_CASE_1 0 //pass
-#define TEST_CASE_2 0 //pass
-#define TEST_CASE_3 0 //pass
-#define TEST_CASE_4 0 //pass
-#define TEST_CASE_5 0 //pass
-#define TEST_CASE_6 0 //pass
-#define TEST_CASE_7 0 //pass 
+#define TEST_CASE_1 1 //pass
+#define TEST_CASE_2 1 //pass
+#define TEST_CASE_3 1 //pass
+#define TEST_CASE_4 1 //pass
+#define TEST_CASE_5 1 //pass
+#define TEST_CASE_6 1 //pass
+#define TEST_CASE_7 1 //pass 
 
-#define TEST_CASE_8 0 //pass
-#define TEST_CASE_9 1 //fail
+#define TEST_CASE_8 1 //pass
+#define TEST_CASE_9 1 //pass
+#define TEST_CASE_10 0 //fail
 
-#define TEST_CASE_10 0 //pass
-
+int failedTestCases = 0;
 
 class A : public Object {
     public:
@@ -42,6 +42,7 @@ class C : public B {
 template<typename T> 
 void runTestCase (std::string testName, T actualValue, T expectedValue){
     bool condition = (actualValue == expectedValue);
+    if (!condition) failedTestCases ++ ;
     std::cout << (condition? "\033[32m": "\033[31m") << testName << ": " << (condition? "PASS " : "FAIL ") <<  (condition? "" :std::to_string(actualValue))<<"\033[0m" << std::endl;
     
 }
@@ -52,14 +53,6 @@ void enableANSIColors() { //enable ANSI Colors for windows
         if (GetConsoleMode(hConsole, &dwMode)) {
             SetConsoleMode(hConsole, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
         }
-}
-
-
-// Signal handler function
-void handleSegmentationFault(int signal) {
-    std::cerr << "Segmentation fault detected (signal: " << signal << ")." << std::endl;
-    std::cerr << "Performing cleanup and exiting..." << std::endl;
-    std::exit(EXIT_FAILURE);
 }
 
 
@@ -78,7 +71,6 @@ void foo2(){
 
 int main(){
     enableANSIColors();
-     std::signal(SIGSEGV, handleSegmentationFault);
     GC& gc = GC::getInstance(HeapMapper::getInstance());
     // 1- Testing multiple roots with multiple children references in same calling stack
     // 1.1 no objects to be cleaned up
@@ -323,7 +315,7 @@ int main(){
     #endif
 
 
-    //2.3 test stack reference before replacing stack frame
+    //2.3 test stack reference before replacing stack frame --fail
     #if TEST_CASE_10
     {
        foo();
@@ -331,10 +323,10 @@ int main(){
     {
          foo();
          int cleanObjects = gc.garbageCollect();
-         runTestCase<int>("2.3- Test stack reference without replacing the stack frame ", cleanObjects , 1); 
+         runTestCase<int>("2.3- Test stack reference without replacing the stack frame ", cleanObjects , 2); 
     }
     #endif
-    runTestCase<int>("Program reaches endpoint ", 1 , 1); 
+    runTestCase<int>("All test cases are success ", failedTestCases , 0); 
     return 0;
 }
 
