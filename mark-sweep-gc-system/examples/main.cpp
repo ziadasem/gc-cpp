@@ -1,5 +1,7 @@
 #include <windows.h>
 #include "../headers/neo-all-inc.hpp"
+#include <csignal>
+#include <cstdlib>
 
 #define TEST_CASE_1 0 //pass
 #define TEST_CASE_2 0 //pass
@@ -10,7 +12,9 @@
 #define TEST_CASE_7 0 //pass 
 
 #define TEST_CASE_8 0 //pass
-#define TEST_CASE_9 1
+#define TEST_CASE_9 1 //fail
+
+#define TEST_CASE_10 0 //pass
 
 
 class A : public Object {
@@ -35,9 +39,10 @@ class C : public B {
     public:
         C* next1c ;
 };
-
-void runTestCase (std::string testName, bool condition){
-    std::cout << (condition? "\033[32m": "\033[31m") << testName << ": " << (condition? "PASS" : "FAIL") <<"\033[0m" << std::endl;
+template<typename T> 
+void runTestCase (std::string testName, T actualValue, T expectedValue){
+    bool condition = (actualValue == expectedValue);
+    std::cout << (condition? "\033[32m": "\033[31m") << testName << ": " << (condition? "PASS " : "FAIL ") <<  (condition? "" :std::to_string(actualValue))<<"\033[0m" << std::endl;
     
 }
 
@@ -49,16 +54,31 @@ void enableANSIColors() { //enable ANSI Colors for windows
         }
 }
 
+
+// Signal handler function
+void handleSegmentationFault(int signal) {
+    std::cerr << "Segmentation fault detected (signal: " << signal << ")." << std::endl;
+    std::cerr << "Performing cleanup and exiting..." << std::endl;
+    std::exit(EXIT_FAILURE);
+}
+
+
 A* globalPtr = nullptr;
 
 void foo(){
     A* localToStack = nullptr;
     neo(&localToStack);
 }
+void foo2(){
+    int x = 100 ;
+    int y = 100 ;
+    int z = 100 ;
+    int w[100];
+}
 
 int main(){
     enableANSIColors();
-
+     std::signal(SIGSEGV, handleSegmentationFault);
     GC& gc = GC::getInstance(HeapMapper::getInstance());
     // 1- Testing multiple roots with multiple children references in same calling stack
     // 1.1 no objects to be cleaned up
@@ -80,7 +100,9 @@ int main(){
         neo(&root1->next->next_5);
 
         int cleanObjects = gc.garbageCollect();
-        runTestCase("1.1 no objects to be cleaned up ", cleanObjects == 0); 
+        runTestCase<int>("1.1 no objects to be cleaned up ", cleanObjects,0); 
+        root1 = nullptr;
+        root2 = nullptr;
     }
     #endif
 
@@ -110,10 +132,16 @@ int main(){
         root2->next_2 = nullptr ; //delete 2
         
         int cleanObjects = gc.garbageCollect();
-        runTestCase("1.2 remove nodes from the reference tree ", cleanObjects == 4); 
+        runTestCase<int>("1.2 remove nodes from the reference tree ", cleanObjects , 
+        #if TEST_CASE_1 
+            14
+        #else
+            4
+        #endif
+        ); 
     }
     #endif
-
+   
     //1.3 remove objects that there pointers points to other objects
     #if TEST_CASE_3
     {
@@ -138,7 +166,7 @@ int main(){
         neo(&root1->next->next_5);
         
         int cleanObjects = gc.garbageCollect();
-        runTestCase("1.3 remove objects that there pointers points to other objects ", cleanObjects == 2); 
+        runTestCase<int>("1.3 remove objects that there pointers points to other objects ", cleanObjects , 2); 
     }
     #endif
 
@@ -167,7 +195,7 @@ int main(){
         root1 = nullptr; //delete 7
         
         int cleanObjects = gc.garbageCollect();
-        runTestCase("1.4 remove one root ", cleanObjects == 7); 
+        runTestCase<int>("1.4 remove one root ", cleanObjects , 7); 
     }
     #endif
 
@@ -200,7 +228,7 @@ int main(){
         root2->next_2->next_4 = nullptr; //delete leef
         
         int cleanObjects = gc.garbageCollect();
-        runTestCase("1.5 remove one root ", cleanObjects == 7); 
+        runTestCase<int>("1.5 remove one root ", cleanObjects , 7); 
     }
     #endif
 
@@ -228,7 +256,7 @@ int main(){
 
         root1->next_3 = nullptr ;
         int cleanObjects = gc.garbageCollect();
-        runTestCase("1.6 remove one object with children and its children has children and brothers, and the node itself has children has brothers ", cleanObjects == 8); 
+        runTestCase<int>("1.6 remove one object with children and its children has children and brothers, and the node itself has children has brothers ", cleanObjects , 8); 
     }
     #endif 
 
@@ -259,12 +287,13 @@ int main(){
        neo(&root1->next_3->next_2);
            
         int cleanObjects = gc.garbageCollect();
-        runTestCase("1.7 replace a pointer with a new object ", cleanObjects == 8); 
+        runTestCase<int>("1.7 replace a pointer with a new object ", cleanObjects , 8); 
     }
     #endif
 
     // 2- Testing global and stack reference
     A* globalToScope = nullptr;
+    
     //2.1- Testing global pointer
     #if TEST_CASE_8
     {
@@ -273,23 +302,39 @@ int main(){
     {
          neo(&globalPtr);
          int cleanObjects = gc.garbageCollect();
-         runTestCase("2.1- Testing global pointer ", cleanObjects == 1); 
+         runTestCase<int>("2.1- Testing global pointer ", cleanObjects , 1); 
     }
     #endif
 
-    //2.2 test stack reference
-    #ifdef TEST_CASE_9
+    //2.2 test stack reference after replacing the stack frame
+    #if TEST_CASE_9
+    {
+        foo();
+        foo2();
+    }
+    {
+          foo();
+          foo2();
+          foo();
+          foo2();
+         int cleanObjects = gc.garbageCollect();
+         runTestCase<int>("2.2- Test stack reference after replacing the stack frame", cleanObjects , 3); 
+    }
+    #endif
+
+
+    //2.3 test stack reference before replacing stack frame
+    #if TEST_CASE_10
     {
        foo();
     }
     {
          foo();
-         foo();
          int cleanObjects = gc.garbageCollect();
-         std::cout << cleanObjects << std::endl;
-         runTestCase("2.2- Test stack reference ", cleanObjects == 3); 
+         runTestCase<int>("2.3- Test stack reference without replacing the stack frame ", cleanObjects , 1); 
     }
     #endif
+    runTestCase<int>("Program reaches endpoint ", 1 , 1); 
     return 0;
 }
 

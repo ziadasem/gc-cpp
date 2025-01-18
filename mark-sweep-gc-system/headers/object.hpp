@@ -4,8 +4,8 @@
 #include "heap_mapper.hpp"
 class Object{
 private:
+    int integrity = 123456789 ;
     bool mark_bit ;
-    const int integrity = 123456789 ;
     unsigned long long sizeofclass = 0 ;
     friend class GC ;
     friend class HeapMapper ;

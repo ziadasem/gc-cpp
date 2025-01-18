@@ -2,7 +2,9 @@
 #include "../headers/garbage_collector.hpp"
 #define Number_Of_Sweeped_Objects int
 
-
+#include <thread>
+#include <chrono>
+#include <iostream>
 
 Number_Of_Sweeped_Objects GC::garbageCollect(){
     print("number of ptrs: "<<heap_mapper.m_ptrs.size());
@@ -15,9 +17,13 @@ Number_Of_Sweeped_Objects GC::garbageCollect(){
 
 
 void GC::markReachableObjects (){
+    
     for (auto it : heap_mapper.m_roots){
+        if (heap_mapper.isDanglingObjectReference(it.second->value)) {
+            continue;
+        }
         if (*it.first == nullptr){
-            heap_mapper.deleteRefTree(it.first);
+            heap_mapper.deleteRefTree(it.first);            
         }else{
             recMarkReachableObjects(it.second); //find its children
         }
@@ -49,12 +55,16 @@ void GC::recMarkReachableObjects (LinkedListNode<Object **> *current){
 
 int GC::sweepUnreachableObjects(){
     int freedCount = 0;
-    for (auto it : heap_mapper.m_objects){
-        if (!it->mark_bit) {            
-            delete it;
+
+    for (auto it = heap_mapper.m_objects.begin(); it != heap_mapper.m_objects.end(); ){
+        if (!(*it)->mark_bit) { 
+            (*it)->integrity = 0;        
+            delete *it;
             freedCount++;
+            it = heap_mapper.m_objects.erase(it);
         }else{
-            it->mark_bit = false;
+            (*it)->mark_bit = false;
+            ++it ;
         }
        
     }

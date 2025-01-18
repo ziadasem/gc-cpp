@@ -57,7 +57,7 @@ void HeapMapper::updateReferenceTree(Object **it) {
                     m_address_LLN[it] = current->brother ; //reference the possible new parent
             }
             print("attached: "<<it << " to: "<< *objectRreference)
-            return; //stop
+            return; //STOP
         }
         objectRreference++ ;
     }
@@ -83,6 +83,20 @@ void HeapMapper::recDeleteRefTree(LinkedListNode<Object**>* current){
 
 }
 // void HeapMapper::recDeleteRefTree(LinkedListNode<Object**>* current){
+inline bool HeapMapper::isDanglingObjectReference(Object **objectRreference)
+{
+    
+    if (!objectRreference){
+        return true;
+    }
+    void * reference = *objectRreference;
+    if (!reference){
+        return true;
+    }
+    int integrity =   * ((int*) reference);
+
+    return integrity != 123456789;
+}
 //     LinkedListNode<Object **> *temp = current;
 //     LinkedListNode<Object **> *tempB = current->brother;
 //     LinkedListNode<Object **> *tempC = current->child;

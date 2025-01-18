@@ -1,6 +1,8 @@
 # Minimum CMake version
 cmake_minimum_required(VERSION 3.10)
 
+set(DEBUG_MODE ON)
+
 # Project name and language
 project(MyProject LANGUAGES CXX)
 
@@ -8,9 +10,17 @@ project(MyProject LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#set the main file
+if (DEBUG_MODE)
+    #set DEBUG flag
+    add_definitions(-D__DEBUG__=1)  
+else()
+    add_definitions(-D__DEBUG__=0)  
+    
+endif()
+
 # Set the source directory
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
-set(EXMP_DIR ${CMAKE_SOURCE_DIR}/examples)
 set(MAIN_FILE ${CMAKE_SOURCE_DIR}/examples/main.cpp)
 
 # Find all .cpp files in the src directory
