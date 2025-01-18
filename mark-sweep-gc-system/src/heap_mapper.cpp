@@ -31,7 +31,7 @@ void HeapMapper::updateReferenceTree(Object **it) {
     for (auto objectRreference = m_ptrs.begin(); objectRreference != m_ptrs.end(); )
     {
         //check if refernce is valid
-        if (*objectRreference == nullptr || **objectRreference == nullptr /*|| (**objectRreference)->integrity != 123456789 */){ 
+        if (*objectRreference == nullptr || **objectRreference == nullptr ){ 
             // not valid refernce
             objectRreference = m_ptrs.erase(objectRreference);
             continue;
@@ -82,23 +82,28 @@ void HeapMapper::recDeleteRefTree(LinkedListNode<Object**>* current){
     delete current;
 
 }
-// void HeapMapper::recDeleteRefTree(LinkedListNode<Object**>* current){
+void HeapMapper::freeHeap() 
+{
+    for (auto& entry : m_address_LLN) {
+        recFreeReferenceTrees(entry.second);
+    }
+    m_address_LLN.clear(); 
+    m_ptrs.clear();
+}
+void HeapMapper::recFreeReferenceTrees(LinkedListNode<Object **> *node)
+{
+    if (!node) return;
+    recFreeReferenceTrees(node->brother);
+    recFreeReferenceTrees(node->child);
+    if (node->value) {
+        m_ptrs.erase(node->value);
+        delete node->value;
+        node->value = NULL;
+    }
+    delete node;
+}
 inline bool HeapMapper::isInvalidObjectReference(Object **objectRreference)
 {
     //check if its null or dangling reference
     return !objectRreference || m_objects.find(*objectRreference) == m_objects.end();
-    
-    // Using integrity variable -the old method-
-    // if (!objectRreference){
-    //     return true;
-    // }
-    // void * level1_reference = *objectRreference;
-
-    // if (!level1_reference){
-    //     return true;
-    // }
-    
-    // // in case of dangling reference has the same address
-    // int integrity =   * ((int*) level1_reference);    
-    // return integrity != 123456789;
 }

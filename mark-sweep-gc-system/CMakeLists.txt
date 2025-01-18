@@ -1,7 +1,7 @@
 # Minimum CMake version
 cmake_minimum_required(VERSION 3.10)
 
-set(DEBUG_MODE ON)
+set(DEBUG_MODE OFF)
 
 # Project name and language
 project(MyProject LANGUAGES CXX)

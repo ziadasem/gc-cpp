@@ -28,6 +28,9 @@ class HeapMapper : public HeapInterface {
     private:   
     void  updateReferenceTree(Object **ptr);
     void recDeleteRefTree(LinkedListNode<Object**>* current);
+    void freeHeap();
+    void recFreeReferenceTrees(LinkedListNode<Object**>* current);
+
     inline  bool isInvalidObjectReference(Object** objectRreference) override ;
 };
 
