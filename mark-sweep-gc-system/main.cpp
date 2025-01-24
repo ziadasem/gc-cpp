@@ -1,9 +1,7 @@
 #include <windows.h>
-#include "../headers/neo-all-inc.hpp"
-#include <csignal>
-#include <cstdlib>
+#include "headers/neo-all-inc.hpp"
 
-#define TEST_CASE_1 1 //pass
+#define TEST_CASE_1 1 //pass 
 #define TEST_CASE_2 1 //pass
 #define TEST_CASE_3 1 //pass
 #define TEST_CASE_4 1 //pass
@@ -42,8 +40,12 @@ class C : public B {
 template<typename T> 
 void runTestCase (std::string testName, T actualValue, T expectedValue){
     bool condition = (actualValue == expectedValue);
-    if (!condition) failedTestCases ++ ;
-    std::cout << (condition? "\033[32m": "\033[31m") << testName << ": " << (condition? "PASS " : "FAIL ") <<  (condition? "" :std::to_string(actualValue))<<"\033[0m" << std::endl;
+    std::string failedTestCaseReport;
+    if (!condition) {
+        failedTestCases ++ ;
+        failedTestCaseReport = "expected: " + std::to_string(expectedValue) + " and found: " + std::to_string(actualValue)   ;
+    }
+    std::cout << (condition? "\033[32m": "\033[31m") << testName << ": " << (condition? "PASS " : "FAIL ") << failedTestCaseReport  <<"\033[0m" << std::endl;
     
 }
 
@@ -104,18 +106,18 @@ int main(){
        A* root1 = nullptr;
        A* root2 = nullptr;
 
-       neo(&root1);
-       neo(&root1->next); 
-       neo(&root1->next_3);
+       neo(&root1); //0xe81b1ff618 -> 0x24dbad66050
+       neo(&root1->next);  //0x24dbad66068 -> 0x24dbad665f0
+       neo(&root1->next_3); // 0x24dbad66078  -> 0x24dbad660f0  (del)
        
-       neo(&root1->next->next_2); 
-        neo(&root1->next->next_2->next_5); 
+       neo(&root1->next->next_2); //0x24dbad66610        0x24dbad65c40
+        neo(&root1->next->next_2->next_5);  // 0x24dbad65c78        0x24dbad66820
     
-       neo(&root1->next_3->next_5);
+       neo(&root1->next_3->next_5); // 0x24dbad66128        0x24dbad663c0  (del)       
 
        root1->next_3 = nullptr; //delete 2
        
-       neo(&root2);
+       neo(&root2); //create 0xe81b1ff610
             neo(&root2->next_2);
             neo(&root2->next_5);
                  neo(&root2->next_2->next_4);
@@ -142,12 +144,12 @@ int main(){
 
        neo(&root1);
        neo(&root1->next); 
-       neo(&root1->next_3);
+       neo(&root1->next_3);// 5108 -> 9a0
        
-       neo(&root1->next->next_2); 
+       neo(&root1->next->next_2);  
         neo(&root1->next->next_2->next_5); 
     
-       neo(&root1->next_3->next_5);
+       neo(&root1->next_3->next_5); 
 
        root1->next_3 = nullptr; //delete 2
        
@@ -157,8 +159,8 @@ int main(){
                  neo(&root2->next_2->next_4);
         neo(&root1->next->next_5);
         
-        int cleanObjects = gc.garbageCollect();
-        runTestCase<int>("1.3 remove objects that there pointers points to other objects ", cleanObjects , 2); 
+        int cleanedObjects = gc.garbageCollect();
+        runTestCase<int>("1.3 remove objects that there pointers points to other objects ", cleanedObjects , 2); 
     }
     #endif
 
@@ -226,26 +228,24 @@ int main(){
 
     //1.6 remove one object with children and its children has children and brothers, and the node itself has children has brothers
     #if  TEST_CASE_6
-    {
+    { 
         A* root1 = nullptr;
         neo(&root1);
             neo(&root1->next);
             neo(&root1->next_2);
-            neo(&root1->next_3); //to be deleted
+            neo(&root1->next_3); //to be deleted 0x24dbad66140 D
             neo(&root1->next_4); // has brothers
-                neo(&root1->next_4->next); //should not be deleted
+                neo(&root1->next_4->next); //should not be deleted 
                 neo(&root1->next_4->next_3); //should not be deleted
 
-                neo(&root1->next_3->next); // has a child
-                neo(&root1->next_3->next_2); // has another child
-                neo(&root1->next_3->next_3); // has another child
-                    neo(&root1->next_3->next_2->next); //child has a child
-                    neo(&root1->next_3->next_2->next_2); //child has a brother
+                neo(&root1->next_3->next); // has a child 
+                neo(&root1->next_3->next_2); // has another 
+                neo(&root1->next_3->next_3); // has another child 
+                    neo(&root1->next_3->next_2->next); //child has a child 
+                    neo(&root1->next_3->next_2->next_2); //child has a brother 
                     neo(&root1->next_3->next_2->next_3); //child has a brother
-                        neo(&root1->next_3->next_2->next->next_5); //child has a brother has a child
-                
+                        neo(&root1->next_3->next_2->next->next_5); //child has a brother has a child 
              neo(&root1->next->next_5); //should not be deleted
-
         root1->next_3 = nullptr ;
         int cleanObjects = gc.garbageCollect();
         runTestCase<int>("1.6 remove one object with children and its children has children and brothers, and the node itself has children has brothers ", cleanObjects , 8); 

@@ -61,7 +61,8 @@ int GC::sweepUnreachableObjects(){
 
     for (auto it = heap_mapper.m_objects.begin(); it != heap_mapper.m_objects.end(); ){
         if (!(*it)->mark_bit) { 
-            //(*it)->integrity = 0;        
+            //(*it)->integrity = 0;  
+            print("deleted: " << *it)      
             delete *it;
             freedCount++;
             it = heap_mapper.m_objects.erase(it);
