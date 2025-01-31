@@ -23,7 +23,7 @@ class A : public Object {
         A* next_4 ;
         A* next_5 ;
         A(){}
-        A(int x)  { Object::y = x ;}
+        A(int x)  { }
 };
 
 
