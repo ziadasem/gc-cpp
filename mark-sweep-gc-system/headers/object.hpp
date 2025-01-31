@@ -14,7 +14,6 @@ private:
 
 
 public:
-    int y;
     Object() :mark_bit{false} {};
     ~Object() ;
 };
