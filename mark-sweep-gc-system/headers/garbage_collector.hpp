@@ -24,7 +24,7 @@ class GC {
     
     private:
         void markReachableObjects ();
-        void recMarkReachableObjects(Object *current);
+        //void recMarkReachableObjects(Object *current);
         int sweepUnreachableObjects();
         void recMarkReachableObjects (LinkedListNode<Object **> *current);
 

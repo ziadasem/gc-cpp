@@ -10,7 +10,6 @@ project(MarkAndSweepGC LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#set the main file
 if (DEBUG_MODE)
     #set DEBUG flag
     add_definitions(-D__DEBUG__=1)  

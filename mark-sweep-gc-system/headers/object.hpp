@@ -15,7 +15,8 @@ private:
 
 public:
     Object() :mark_bit{false} {};
-    ~Object() ;
+    ~Object() {}
+    
 };
 #endif // !__OBJECT_H__
 

@@ -11,7 +11,7 @@ void HeapMapper::add_ptr_value(Object **ptr, Object* value)
 }
 
 void HeapMapper::updateReferenceTree(Object **it) {
-    //check if new pointer is already existing, remove the tree
+    //check if new pointer is already existing, remove the tree to be reassigned
     if (m_address_LLN[it] && m_address_LLN[it]->value){
         deleteRefTree(it);
         print("reassign: "<<it)
